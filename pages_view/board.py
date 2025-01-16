@@ -227,7 +227,6 @@ class MAIN_BOARD():
     def __init__(self):
         pass
     def run_board(self):
-        module_config.create_db_pool()
         BOARD_PREDICT().house_board_predict()
         module_config.add_sidebar_footer()
 if (st.session_state.login_request == False and st.session_state.register_request == False) or (st.session_state.login_request is None and st.session_state.register_request is None):

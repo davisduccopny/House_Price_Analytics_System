@@ -200,8 +200,10 @@ def query_to_dataframe(query, conn):
     data = cursor.fetchall()  
     cursor.close()
     return pd.DataFrame(data)
+
 @st.cache_data
 def show_province():
+    create_db_pool()
     conn = connect_to_mysql()
     try:
         provine_data = query_to_dataframe("SELECT DISTINCT tinh_thanh_pho, ma_tp FROM region_info;", conn)
