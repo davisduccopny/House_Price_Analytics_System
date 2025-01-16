@@ -1,0 +1,18 @@
+[data-testid=stMainBlockContainer ] {
+    padding: 0.5rem 4.5rem 10rem;
+}
+.stCustomComponentV1{
+    border-radius: 15px;
+}
+.st-key-ctn_hearder_predict_house .stSelectbox {
+    display: flex;
+}
+.st-key-ctn_hearder_predict_house [data-testid="stIFrame"]{
+    height: 100vh;
+} 
+.st-key-ctn_hearder_predict_house .stColumn{
+    padding: 10px 10px;
+    border-radius:15px;
+    font-weight: bolder;
+    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.1);  
+}
