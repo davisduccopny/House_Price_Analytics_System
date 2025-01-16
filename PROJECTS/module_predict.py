@@ -32,7 +32,7 @@ def load_data_from_csv():
 
 @st.cache_data
 def load_region_data_json():
-    with open("src/location/diaphantinh.geojson", "r", encoding="utf-8") as f:
+    with open("src/location/output.geojson", "r", encoding="utf-8") as f:
         geojson_data = json.load(f)
     return geojson_data
 

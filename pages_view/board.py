@@ -21,34 +21,18 @@ if "login_request" not in st.session_state:
 if "register_request" not in st.session_state:
     st.session_state.register_request = None
 # PART LOAD DATA
-@st.cache_data
+@st.cache_resource
 def load_data_from_csv():
     data = pd.read_csv("data/data_prosesing.csv")
     data = pd.DataFrame(data)
     return data
-@st.cache_data
+@st.cache_resource
 def load_region_data_json():
     with open("src/location/diaphantinh.geojson", "r", encoding="utf-8") as f:
         geojson_data = json.load(f)
     return geojson_data
-# PART BOARD PREDICT
-class BOARD_PREDICT():
-    def __init__(self):
-        self.province_data = module_config.show_province()
-        self.province_data_arr = {row["ma_tp"]: row["tinh_thanh_pho"] for _, row in self.province_data.iterrows()}
-        self.selected_provine_key =list(self.province_data_arr.keys())
-    
-    def filter_data(self,data,selected_provine,max_price,min_price):
-        selected_provine = float(selected_provine) if selected_provine != "Tất cả" else selected_provine
-        if selected_provine != "Tất cả":
-            data_selected = data[(data["Ma_TP"] == selected_provine) &
-                        (data["Price"] >= min_price) &
-                        (data["Price"] <= max_price)]
-        else:
-            data_selected = data[(data["Price"] >= min_price) &
-                        (data["Price"] <= max_price)]
-        return data_selected
-    def map_vietnam_chart_price(self,data, geojson_data):
+@st.cache_data
+def map_vietnam_chart_price(data, geojson_data):
         data = data.rename(columns={"Province": "ten_tinh"})
         if len(data["ten_tinh"].unique()) > 1:
             data = data.groupby("ten_tinh").agg({"Price": "mean"}).reset_index()
@@ -77,6 +61,23 @@ class BOARD_PREDICT():
             )
         )
         st.plotly_chart(fig,use_container_width=True,theme="streamlit",key="map_vietnam_chart_price")
+# PART BOARD PREDICT
+class BOARD_PREDICT():
+    def __init__(self):
+        self.province_data = module_config.show_province()
+        self.province_data_arr = {row["ma_tp"]: row["tinh_thanh_pho"] for _, row in self.province_data.iterrows()}
+        self.selected_provine_key =list(self.province_data_arr.keys())
+    
+    def filter_data(self,data,selected_provine,max_price,min_price):
+        selected_provine = float(selected_provine) if selected_provine != "Tất cả" else selected_provine
+        if selected_provine != "Tất cả":
+            data_selected = data[(data["Ma_TP"] == selected_provine) &
+                        (data["Price"] >= min_price) &
+                        (data["Price"] <= max_price)]
+        else:
+            data_selected = data[(data["Price"] >= min_price) &
+                        (data["Price"] <= max_price)]
+        return data_selected
     def Pie_chart_by_params(self,data, params):
         data["Count"] = data.groupby(params)[params].transform('count')
         data["Percentage"] = (data["Count"] / data["Count"].sum()) * 100
@@ -156,7 +157,7 @@ class BOARD_PREDICT():
         with ctn_house_header:
             cols_house_header = st.columns([1,1,1])
             cols_house_header[0].write(" ")
-            cols_house_header[0].info("HOUSE PRICE PREDICTION" if st.session_state.display_name_house is None else st.session_state.display_name_house,icon=":material/grid_view:")
+            cols_house_header[0].info("##### HOUSE PRICE PREDICTION",icon=":material/grid_view:")
             
             selected_provine = cols_house_header[1].selectbox("Chọn tỉnh thành",options=["Tất cả"] + list(self.selected_provine_key),
                                                               format_func=lambda x: "Tất cả" if x == "Tất cả" else self.province_data_arr.get(x, ""),
@@ -194,7 +195,7 @@ class BOARD_PREDICT():
                     ctn_metric_board_03.caption("Diện tích trung bình")
                 with cols_main_board_house[1]:
                     geojson_data = load_region_data_json()
-                    self.map_vietnam_chart_price(data_selected, geojson_data)
+                    map_vietnam_chart_price(data_selected, geojson_data)
                     
                 with cols_main_board_house[2]:
                     if data_selected is not None:

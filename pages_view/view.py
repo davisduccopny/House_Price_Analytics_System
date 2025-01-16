@@ -59,6 +59,7 @@ class VIEW_CLASS():
         self.selected_provine_key =list(self.province_data_arr.keys())
         self.model_prediction = module_predict.load_model("notebooks/random_forest_model.pkl")
         st.session_state.house_data = self.house_data
+        
     
     def predict_house_price(self,area, frontage, access_road, 
                             floors, bedrooms, bathrooms, 
@@ -125,6 +126,230 @@ class VIEW_CLASS():
             
             html(create_map(st.session_state.house_data,predicted_price))
                 
+    def ui_info_detail(self):
+        
+        ctn_hearder_info_detail = st.container(key="ctn_hearder_info_detail")
+        with ctn_hearder_info_detail:
+            cols_header = st.columns([0.5,0.5, 1])
+            cols_header[0].markdown("""
+                                    <h5 style="text-align:center;padding-top:10px">📊Thống kê chi tiết💰</h5>
+                                    """,unsafe_allow_html=True)
+            city_selected = cols_header[1].selectbox(" ",options=list(self.selected_provine_key),
+                                                              format_func=lambda x: "Lựa chọn tỉnh" if x == "Lựa chọn tỉnh" else self.province_data_arr.get(x, ""),
+                                                              key="selected_provine_detail",index=49)
+
+            district_data = self.region_info[self.region_info["ma_tp"] == city_selected][["ma_qh","quan_huyen"]].drop_duplicates()
+            district_selected = cols_header[2].multiselect("Chọn huyện: ",options=["Lựa chọn huyện"] + (list(district_data["ma_qh"]) if district_data is not None else []),
+                                                                format_func=lambda x: "Lựa chọn huyện" if x == "Lựa chọn huyện" else (district_data[district_data["ma_qh"] == x]["quan_huyen"].values[0] if district_data is not None else ""),
+                                                                key="selected_district_detail",default=["767","764","765"] if city_selected == "79" else [])
+        with st.spinner("Đang tải dữ liệu..."):
+            self.house_data_csv = module_predict.load_data_from_csv()
+            district_selected = [(float(i)) for i in district_selected]
+            house_data = self.house_data_csv.copy()
+            house_data = house_data[house_data["Ma_QH"].isin(district_selected)]
+            ctn_main_info_detail = st.container(key="ctn_main_info_detail")
+            with ctn_main_info_detail:
+                cols_main = st.columns([1,1])
+                cols_main[0].plotly_chart(self.bar_chart_compare_price(house_data),use_container_width=True,key="bar_chart_price")
+                cols_main[1].plotly_chart(self.bar_chart_compare_area(house_data),use_container_width=True,key="bar_chart_area")
+            ctn_secondary_info_detail = st.container(key="ctn_secondary_info_detail")
+            with ctn_secondary_info_detail:
+                cols_secondary = st.columns([1,1])
+                cols_secondary[0].plotly_chart(self.bar_chart_compare_bedrooms_and_bathrooms(house_data),use_container_width=True,key="scatter_chart_bedrooms_bathroom")
+                cols_secondary[1].plotly_chart(self.bar_chart_compare_fronstage_and_accessRoad(house_data),use_container_width=True,key="scatter_chart_fronstage_accessRoad")
+            ctn_third_info_detail = st.container(key="ctn_third_info_detail")
+            with ctn_third_info_detail:
+                ctn_child_third = st.container(key="ctn_child_third")
+                with ctn_child_third:
+                    cols_ctn_child_third = st.columns([0.4,1])
+                    cols_ctn_child_third[0].markdown("""
+                                                    <h5 style="text-align:center;">🗺️Bản đồ nhiệt so sánh💰</h5>
+                                                    """,unsafe_allow_html=True)
+                    radio_data_type = cols_ctn_child_third[1].radio("Chọn loại dữ liệu: ",["Giá nhà","Diện tích","Số phòng ngủ","Số phòng vệ sinh","Mặt tiền" ,"Đường vào"],horizontal=True,key="selectbox_data_type")
+                city_selected = self.province_data_arr.get(city_selected, "")
+                ctn_child_third_02 = st.container(key="ctn_child_third_02")
+                with ctn_child_third_02:
+                    html(self.map_chart_show_params(house_data,city_selected,district_selected,radio_data_type,district_data))
+                        
+                    
+    def bar_chart_compare_price(self,df):
+        df = df.groupby('District')['Price'].mean().reset_index()
+        fig = px.bar(df, x='District', y='Price', color='District', title='Biểu đồ so sánh giá nhà',labels={'District':'Quận huyện','Price':'Giá nhà (tỷ VND)'})
+        fig.update_layout(
+            xaxis_title="Quận huyện",
+            yaxis_title="Giá nhà (tỷ VND)",
+            legend_title="Quận huyện",
+            font=dict(
+            size=12,
+            color="RebeccaPurple"
+            ),
+            margin=dict(l=0, r=0, t=50, b=0),
+            height=250,
+            title={
+            'text': "Biểu đồ so sánh giá nhà",
+            'y':0.9,
+            'x':0.5,
+            'xanchor': 'center',
+            'yanchor': 'top'
+            }
+        )
+        return fig
+    def bar_chart_compare_area(self,df):
+        df = df.groupby('District')['Area'].mean().reset_index()
+        fig = px.bar(df, x='District', y='Area', color='District', title='Biểu đồ so sánh diện tích nhà theo Quận huyện',labels={'District':'Quận huyện','Area':'Diện tích nhà (m2)'})
+        fig.update_layout(
+            xaxis_title="Quận huyện",
+            yaxis_title="Diện tích nhà (m2)",
+            legend_title="Quận huyện",
+            font=dict(
+            size=12,
+            color="RebeccaPurple"
+            ),
+            margin=dict(l=0, r=0, t=50, b=0),
+            height=250,
+            title={
+            'text': "Biểu đồ so sánh diện tích nhà",
+            'y':0.9,
+            'x':0.5,
+            'xanchor': 'center',
+            'yanchor': 'top'
+            }
+        )
+        return fig
+    def bar_chart_compare_bedrooms_and_bathrooms(self, df):
+        df = df.groupby(['District']).agg({'Bedrooms': 'mean', 'Bathrooms': 'mean'}).reset_index()
+        fig = px.bar(df, x='District', y=['Bedrooms', 'Bathrooms'], barmode='group',
+                     title='Biểu đồ so sánh trung bình số phòng ngủ và số phòng vệ sinh',
+                     labels={'value': 'Số lượng trung bình', 'variable': 'Loại phòng'})
+        fig.update_layout(
+            xaxis_title="Quận huyện",
+            yaxis_title="Số lượng trung bình",
+            legend_title="Loại phòng",
+            font=dict(
+                size=12,
+                color="RebeccaPurple"
+            ),
+            margin=dict(l=0, r=0, t=50, b=0),
+            height=250,
+            title={
+                'text': "Biểu đồ so sánh trung bình số phòng ngủ và số phòng vệ sinh",
+                'y': 0.9,
+                'x': 0.5,
+                'xanchor': 'center',
+                'yanchor': 'top'
+            }
+        )
+        return fig
+    def bar_chart_compare_fronstage_and_accessRoad(self, df):
+        df = df.groupby(['District']).agg({'Frontage': 'mean', 'Access Road': 'mean'}).reset_index()
+        fig = px.bar(df, x='District', y=['Frontage', 'Access Road'], barmode='group',
+                     title='Biểu đồ so sánh trung bình mặt tiền và đường vào',
+                     labels={'value': 'Số lượng trung bình', 'variable': 'Loại phòng'})
+        fig.update_layout(
+            xaxis_title="Quận huyện",
+            yaxis_title="Số lượng trung bình",
+            legend_title="Loại phòng",
+            font=dict(
+                size=12,
+                color="RebeccaPurple"
+            ),
+            margin=dict(l=0, r=0, t=50, b=0),
+            height=250,
+            title={
+                'text': "Biểu đồ so sánh trung bình mặt tiền và đường vào",
+                'y': 0.9,
+                'x': 0.5,
+                'xanchor': 'center',
+                'yanchor': 'top'
+            }
+        )
+        return fig
+    
+    def map_chart_show_params(self, df, city_selected, selected_districts, radio_data_type, district_data):
+        from unidecode import unidecode
+        df["District"] = df['District'].apply(unidecode)
+        district_data["ma_qh"] = district_data["ma_qh"].astype(int)
+        try:
+
+            selected_districts = [int(district) for district in selected_districts]
+            mapping = dict(zip(district_data['ma_qh'].astype(str), district_data['quan_huyen']))
+            selected_districts_names = [mapping[str(district)] for district in selected_districts if str(district) in mapping]
+            selected_districts_names = [unidecode(mapping[str(district)]) for district in selected_districts if str(district) in mapping]
+            
+            
+            if not selected_districts_names:
+                st.error("Không có quận/huyện nào hợp lệ được chọn!")
+                return None
+
+            geojson_data = module_predict.load_region_data_json()
+
+            data_column_map = {
+                "Giá nhà": "Price",
+                "Diện tích": "Area",
+                "Số phòng ngủ": "Bedrooms",
+                "Số phòng vệ sinh": "Bathrooms",
+                "Mặt tiền": "Frontage",
+                "Đường vào": "Access Road"
+            }
+            data_column = data_column_map.get(radio_data_type)
+            if not data_column:
+                st.error(f"Loại dữ liệu '{radio_data_type}' không hợp lệ!")
+                return None
+
+            district_lat_lon = {}
+            for feature in geojson_data['features']:
+                province_name = feature['properties']['Ten_Tinh']  
+                district_name = feature['properties']['Ten_Huyen']  
+                
+                if province_name == city_selected and district_name in selected_districts_names:
+                    coords = feature['geometry']['coordinates'][0]
+                    lat = sum([coord[1] for coord in coords]) / len(coords)
+                    lon = sum([coord[0] for coord in coords]) / len(coords)
+                    district_lat_lon[district_name] = [lat, lon]
+
+            if not district_lat_lon:
+                st.error(f"Không tìm thấy dữ liệu quận/huyện cho tỉnh {city_selected}.")
+                return None
+            
+            if district_lat_lon:
+                first_district_coords = list(district_lat_lon.values())[0]
+                m = folium.Map(location=first_district_coords, zoom_start=12)
+            else:
+                m = folium.Map(location=[21.0285, 105.8542], zoom_start=12)
+
+
+            for district_name, coords in district_lat_lon.items():
+                if district_name in df['District'].values:
+                    value = df[df['District'] == district_name][data_column].values[0]
+                    folium.CircleMarker(
+                        location=coords,
+                        radius=5,
+                        color='blue',
+                        fill=True,
+                        fill_color='blue',
+                        fill_opacity=0.7,
+                        popup=f"{district_name}: {value}"
+                    ).add_to(m)
+                else:
+                    st.warning(f"Dữ liệu cho huyện '{district_name}' không có trong DataFrame!")
+
+            if not df.empty:
+                heat_data = [
+                    [coords[0], coords[1], df[df['District'] == district_name][data_column].values[0]]
+                    for district_name, coords in district_lat_lon.items()
+                    if district_name in df['District'].values
+                ]
+                HeatMap(heat_data).add_to(m)
+
+            if df.empty:
+                for feature in geojson_data['features']:
+                    if feature['properties']['Ten_Tinh'] == city_selected:
+                        folium.GeoJson(feature).add_to(m)
+
+            return m._repr_html_()
+        except Exception as e:
+            st.error(f"Lỗi khi tạo bản đồ: {e}")
+            return None
 
     
 class MAIN_CLASS():
@@ -173,8 +398,8 @@ class MAIN_CLASS():
         if selected == "Dự đoán":
             VIEW_CLASS().ui_predict()
         else:
-            st.title("Thống kê chi tiết")
-            st.markdown("### Thống kê chi tiết")
+            VIEW_CLASS().ui_info_detail()
 if (st.session_state.login_request == False and st.session_state.register_request == False) or (st.session_state.login_request is None and st.session_state.register_request is None):
     MAIN_CLASS().run_view()
     module_config.add_sidebar_footer()
+    

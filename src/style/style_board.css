@@ -7,6 +7,9 @@
     font-weight: bolder;
     box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.1);       
 }
+.st-key-ctn_house_header .stColumn{
+    border-left: 5px solid #00a6a6;
+}
 .st-key-ctn_metric_board_01, .st-key-ctn_metric_board_02,.st-key-ctn_metric_board_03,.st-key-ctn_metric_board_04{
     border-left: 5px solid #00a6a6;
 }
