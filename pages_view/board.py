@@ -8,7 +8,7 @@ import time
 import datetime
 import plotly.express as px
 import PROJECTS.config as module_config
-
+import gc
 
 # PART SET CONFIG
 with open('src/style/style.css', encoding="utf-8")as f:
@@ -21,17 +21,17 @@ if "login_request" not in st.session_state:
 if "register_request" not in st.session_state:
     st.session_state.register_request = None
 # PART LOAD DATA
-@st.cache_resource
-def load_data_from_csv():
-    data = pd.read_csv("data/data_prosesing.csv")
-    data = pd.DataFrame(data)
-    return data
+# @st.cache_resource
+# def load_data_from_csv():
+#     data = pd.read_csv("data/data_prosesing.csv")
+#     data = pd.DataFrame(data)
+#     return data
 @st.cache_resource
 def load_region_data_json():
     with open("src/location/diaphantinh.geojson", "r", encoding="utf-8") as f:
         geojson_data = json.load(f)
     return geojson_data
-@st.cache_data
+
 def map_vietnam_chart_price(data, geojson_data):
         data = data.rename(columns={"Province": "ten_tinh"})
         if len(data["ten_tinh"].unique()) > 1:
@@ -61,6 +61,7 @@ def map_vietnam_chart_price(data, geojson_data):
             )
         )
         st.plotly_chart(fig,use_container_width=True,theme="streamlit",key="map_vietnam_chart_price")
+        fig = None
 # PART BOARD PREDICT
 class BOARD_PREDICT():
     def __init__(self):
@@ -116,6 +117,7 @@ class BOARD_PREDICT():
         )
 
         st.plotly_chart(pie_fig, use_container_width=True, theme="streamlit", key="pie_fig_params")
+        pie_fig = None
     
     def box_plot_by_params(self, data, params):
         box_fig = px.box(
@@ -148,8 +150,10 @@ class BOARD_PREDICT():
             height=300
         )
         st.plotly_chart(box_fig, use_container_width=True, theme="streamlit", key="box_fig_params")
+        box_fig = None
     
     def house_board_predict(self):
+        from PROJECTS.module_predict import load_data_from_csv
         if "display_name_house" not in st.session_state:
             st.session_state.display_name_house = None
         ctn_house_header = st.container(key="ctn_house_header")
@@ -162,6 +166,7 @@ class BOARD_PREDICT():
             selected_provine = cols_house_header[1].selectbox("Chọn tỉnh thành",options=["Tất cả"] + list(self.selected_provine_key),
                                                               format_func=lambda x: "Tất cả" if x == "Tất cả" else self.province_data_arr.get(x, ""),
                                                               key="selected_provine")
+
             
             price_range = cols_house_header[2].slider(
                 "Chọn khoảng giá (tỷ đồng):",
@@ -222,7 +227,7 @@ class BOARD_PREDICT():
                     self.Pie_chart_by_params(data_selected, radio_selected_params) 
                 with cols_secondary_board_house[2]:
                     self.box_plot_by_params(data_selected, radio_selected_params)
-
+        
             
 class MAIN_BOARD():
     def __init__(self):
@@ -232,4 +237,5 @@ class MAIN_BOARD():
         module_config.add_sidebar_footer()
 if (st.session_state.login_request == False and st.session_state.register_request == False) or (st.session_state.login_request is None and st.session_state.register_request is None):
     MAIN_BOARD().run_board()
+    gc.collect()
     

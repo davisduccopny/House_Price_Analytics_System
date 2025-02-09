@@ -1,16 +1,12 @@
 import streamlit as st
 import pandas as pd
 import json
-from openpyxl.styles import Font, Border, Side, PatternFill, Alignment
-from openpyxl import Workbook
-import openpyxl
 import time
 import datetime
 import plotly.express as px
 import PROJECTS.config as module_config
 from streamlit_option_menu import option_menu
 import folium
-from streamlit_folium import st_folium
 from streamlit.components.v1 import html
 from folium.plugins import MarkerCluster
 from folium.plugins import HeatMap
@@ -29,7 +25,7 @@ if "login_request" not in st.session_state:
 if "register_request" not in st.session_state:
     st.session_state.register_request = None
     
-@st.cache_data()
+@st.cache_data
 def create_map(df,predict_price):
     if len(df["dia_chi"].unique()) > 1:
         map_center = [14.0583, 108.2772] 
