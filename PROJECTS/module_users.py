@@ -12,9 +12,9 @@ def load_data_for_user(username):
     conn = module_config.connect_to_mysql()
     try:
         cursor = conn.cursor()
-        cursor.execute("SELECT id, username, role, display_name FROM users WHERE username = %s;", (username,))
+        cursor.execute("SELECT id, username, role, display_name,region_use,send_mail FROM users WHERE username = %s;", (username,))
         users = cursor.fetchall()
-        users = pd.DataFrame(users, columns=["id", "username", "role", "display_name"])
+        users = pd.DataFrame(users, columns=["id", "username", "role", "display_name","region_use","send_mail"])
         if users.empty:
             return False
         return users
@@ -42,11 +42,11 @@ def change_password(username, old_pass, new_pass):
         return False
     finally:
         conn.close()
-def change_profile(username, display_name):
+def change_profile(username, display_name,region_use,send_mail_status):
     conn = module_config.connect_to_mysql()
     try:
         cursor = conn.cursor()
-        cursor.execute("UPDATE users SET display_name = %s WHERE username = %s;", (display_name, username))
+        cursor.execute("UPDATE users SET display_name = %s,region_use = %s,send_mail = %s WHERE username = %s;", (display_name,region_use,send_mail_status, username))
         conn.commit()
         return True
     except (OperationalError, InternalError, Error) as e:

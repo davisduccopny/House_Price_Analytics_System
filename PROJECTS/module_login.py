@@ -1,15 +1,11 @@
 import bcrypt
 import streamlit as st
-import mysql.connector
-from mysql.connector import Error
-import os
-from datetime import datetime
 import PROJECTS.config as config_project
 import time
 import json
 import requests
-from streamlit_lottie import st_lottie
-from streamlit_lottie import st_lottie_spinner
+from PROJECTS.config import show_province
+from PROJECTS.module_send_mail import send_confirmation_email,generate_otp
 
 # LOAD LOTTIE JSON
 def load_lottiefile(filepath: str):
@@ -74,8 +70,12 @@ def update_user_by_admin(username_state, username,display_name, password, conn, 
     return True
 
 ### PATH THIET KE VA XU LY LOGIN
+
+        
+    
 def login(type_process):
-    cols_login_parent = st.columns([1,1])
+    empty_placeholder = st.empty()
+    cols_login_parent = empty_placeholder.columns([1,1])
     container_login = cols_login_parent[0].container(key="container_login")
     with container_login:
         st.markdown("""
@@ -96,6 +96,17 @@ def login(type_process):
                 min-width: auto;
                 max-width: initial;
 
+                }}
+                @media (max-width: 768px) {{
+                    [data-testid=stMainBlockContainer ] {{
+                        padding: 1.5rem 3rem 8rem !important;
+                    }}
+                }}
+
+                @media (max-width: 480px) {{
+                    [data-testid=stMainBlockContainer ] {{
+                        padding: 1.25rem 1rem 5rem !important;
+                    }}
                 }}
                 [data-testid="stSidebar"] {{
                     display: none;
@@ -166,18 +177,29 @@ def login(type_process):
                                 st.error("❌ Tên đăng nhập hoặc mật khẩu không đúng!")
                         else:
                             st.warning("❌ Vui lòng nhập tên đăng nhập và mật khẩu!")
+                
+                
         elif type_process == 'register':
             with container_login.form(key="register_form",enter_to_submit=True, border=False):
+                province_data = show_province()
+                province_data_arr = {row["ma_tp"]: row["tinh_thanh_pho"] for _, row in province_data.iterrows()}
+                selected_provine_key =list(province_data_arr.keys())
                 title_placeholder = st.empty()
                 title_placeholder.subheader("Đăng ký")
                 username_placeholder = st.empty()
                 password_placeholder = st.empty()
-                display_name_placeholder = st.empty()
                 success_placeholder = st.empty()
                 username = username_placeholder.text_input("Tên người dùng", placeholder="Enter user name", key="username_register")
                 password = password_placeholder.text_input("Mật khẩu", type="password", placeholder="Enter password", key="password_register")
-                display_name = display_name_placeholder.text_input("Tên hiển thị", placeholder="Enter display name", key="display_name_register")
-               
+                column_third_register_form = st.columns([1,1])
+                with column_third_register_form[0]:
+                    display_name_placeholder = st.empty()
+                    display_name = display_name_placeholder.text_input("Tên hiển thị", placeholder="Enter display name", key="display_name_register")
+                with column_third_register_form[1]:
+                    region_use_placeholder = st.empty()
+                    region_use = region_use_placeholder.selectbox("Khu vực",list(selected_provine_key),
+                                                                    format_func=lambda x: province_data_arr[x] if x in province_data_arr else x
+                                                                   , key="region_use_register")
                 cols_register_type_process = st.columns([3,1])
                 with cols_register_type_process[0]:
                     if cols_register_type_process[0].form_submit_button("🔓Đăng ký",type="primary", help="Nhấn vào để đăng ký!"):
@@ -187,27 +209,59 @@ def login(type_process):
                                 cursor = conn.cursor()
                                 user = select_info_user(username,cursor)
                                 if user is None:
-                                    hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-                                    cursor.execute(
-                                        "INSERT INTO users (username, password, role,display_name) VALUES (%s, %s, %s, %s)",
-                                        (username, hashed_password, 'user',display_name)
-                                    )
-                                    conn.commit()
-                                    st.success("✅ Đăng ký thành công!")
-                                    time.sleep(2)  
-                                    st.session_state.is_logged_in = True
-                                    st.session_state.role_access_admin = 'user'
-                                    st.session_state.username_house = username
-                                    st.session_state.display_name_house = display_name
-                                    del st.session_state.register_request
-                                    title_placeholder.empty()
-                                    username_placeholder.empty()
-                                    password_placeholder.empty()
-                                    display_name_placeholder.empty()
-                                    success_placeholder.empty()
-                                    st.rerun()
+                                    st.session_state.otp_confirmations_code = generate_otp()
+                                    if send_confirmation_email(username,display_name,st.session_state.otp_confirmations_code):
+                                    
+                                        @st.dialog("Nhập mã xác nhận vừa gửi về email!",width="small")
+                                        def otp_dialog():
+                                            st.write("Mã xác nhận đã được gửi về email của bạn. Vui lòng kiểm tra và nhập mã xác nhận vào ô bên dưới!")
+                                            otp_code = st.text_input("Mã xác nhận", key="otp_code_input",max_chars=6)
+                                            if st.button("Xác nhận",key="confirm_otp_button",use_container_width=True,type="primary"):
+                                                if otp_code is not None and otp_code != '':
+                                                    if otp_code == st.session_state.otp_confirmations_code:
+                                                        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+                                                        cursor.execute(
+                                                            "INSERT INTO users (username, password, role,display_name,region_use) VALUES (%s, %s, %s, %s, %s)",
+                                                            (username, hashed_password, 'user',display_name,region_use)
+                                                        )
+                                                        conn.commit()
+                                                        st.success("✅ Đăng ký thành công!")
+                                                        time.sleep(2)  
+                                                        st.session_state.role_access_admin = 'user'
+                                                        st.session_state.username_house = username
+                                                        st.session_state.display_name_house = display_name
+                                                        del st.session_state.register_request
+                                                        del st.session_state.otp_confirmations_code
+                                                        title_placeholder.empty()
+                                                        username_placeholder.empty()
+                                                        password_placeholder.empty()
+                                                        display_name_placeholder.empty()
+                                                        region_use_placeholder.empty()
+                                                        success_placeholder.empty()
+                                                        st.session_state.is_logged_in = True
+                                                        st.rerun()
+                                                    else:  
+                                                        st.warning("❌ Mã xác nhận không đúng!")
+                                                    
+                                                else:
+                                                    st.warning("❌ Vui lòng nhập mã xác nhận!")
+                                        otp_dialog()
+                                    else:
+                                        st.error("❌ Gửi mã xác nhận không thành công! Email không tồn tại!")
                                 else:
                                     st.error("❌ Tên đăng nhập đã tồn tại!")
-
-    # with cols_login_parent[1]:
-    #     st_lottie(load_lottiefile("src/lottie/Animation -login.json"),key="lottie_login") 
+        empty_button_transfer = st.empty()
+        if st.session_state.login_request:
+            button_change_page = empty_button_transfer.button("Chưa có tài khoản?",icon=":material/no_accounts:", key="register_request_button_key")
+            if button_change_page:
+                st.session_state.register_request = True
+                st.session_state.login_request = None
+                st.switch_page('pages_view/users.py')
+        elif st.session_state.register_request:
+            button_change_page = empty_button_transfer.button("Đã có tài khoản?",icon=":material/account_circle:", key="login_request_button_key")
+            if button_change_page:
+                st.session_state.register_request = None
+                st.session_state.login_request = True
+                st.switch_page('pages_view/users.py')
+        if st.session_state.is_logged_in:
+            empty_button_transfer.empty()

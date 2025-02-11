@@ -1,0 +1,16 @@
+[data-testid=stMainBlockContainer ] {
+    padding: 1rem 5rem 10rem;
+}
+@media (max-width: 768px) {
+
+    [data-testid=stMainBlockContainer ] {
+        padding: 3rem 3rem 8rem;
+    }
+    
+}
+
+@media (max-width: 480px) {
+    [data-testid=stMainBlockContainer ] {
+        padding: 3rem 1rem 5rem;
+    }
+}

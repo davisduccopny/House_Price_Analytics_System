@@ -48,3 +48,29 @@ div[data-testid="stExpander"] div[role="button"] p
     margin: 0;
     padding: 0;
 }
+@media (max-width: 768px) {
+    .state_home_h1{
+        font-size: x-large;
+    }
+    #target-section-0 h1{
+        font-size: 75px !important;
+    }
+    #icon-home-info{
+        height: 55px !important;
+        margin-right: -1% !important;
+        margin-top: -20px;
+    }
+}
+@media (max-width: 480px) {
+    .state_home_h1{
+        font-size: x-large;
+    }
+    #target-section-0 h1{
+        font-size: 60px !important;
+    }
+    #icon-home-info{
+        height: 40px !important;
+        margin-right: -2% !important;
+        margin-top: -20px;
+    }
+}

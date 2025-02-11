@@ -7,8 +7,8 @@ import PROJECTS.module_expand as module_expand
 import PROJECTS.module_users as module_users
 from PROJECTS.module_login import login
 
-if not st.session_state.get("is_logged_in", False):
-    st.session_state.login_request = True
+# if not st.session_state.get("is_logged_in", False):
+#     st.session_state.login_request = True
 if "login_request" not in st.session_state:
     st.session_state.login_request = None
 if "register_request" not in st.session_state:
@@ -31,7 +31,9 @@ class OTHER_USER():
         return has_digit and has_alpha
 class FRONTEND_UI_DESIGN():
     def __init__(self):
-        pass
+        self.province_data = module_config.show_province()
+        self.province_data_arr = {row["ma_tp"]: row["tinh_thanh_pho"] for _, row in self.province_data.iterrows()}
+        self.selected_provine_key =list(self.province_data_arr.keys())
 
     def ui_info(self, text,loai_data):
         container_title_manage_expand = st.container(key="container_title_manage_expand")
@@ -43,7 +45,7 @@ class FRONTEND_UI_DESIGN():
                 with st.form(key="search_form", enter_to_submit=True,border=False):
                     cols_search = st.columns([6,1])
                     search_term = cols_search[0].text_input(label=" ",placeholder="Tìm kiếm thông tin", key="search_term",type="default")
-                    if cols_search[1].form_submit_button("🔍"):
+                    if cols_search[1].form_submit_button("🔍",use_container_width=True):
                         if search_term:
                             return search_term
                         else:
@@ -149,19 +151,33 @@ class FRONTEND_UI_DESIGN():
             container_form_change_display = st.container(key="container_form_change_display")
             with container_form_change_display:
                 with st.form(key="change_display_form", enter_to_submit=True, border=False, clear_on_submit=False):
+                    
                     cols_change_display = st.columns([6,1])
-                    display_name = cols_change_display[0].text_input(label="Tên hiển thị", value=MAIN_USER().load_data_for_user()[0],placeholder="Nhập tên hiển thị", key="display_name_user", disabled=disable)
+                    
+                    display_name = cols_change_display[0].text_input(label="Tên hiển thị", value=MAIN_USER().load_data_for_user()[0]
+                                                                     ,placeholder="Nhập tên hiển thị", key="display_name_user"
+                                                                     , disabled=disable,
+                                                                     help="Tên hiển thị của bạn sẽ được hiển thị trên trang web")
+                    region_use = cols_change_display[0].selectbox("Khu vực sử dụng", options=self.selected_provine_key, key="region_use", 
+                                            format_func=lambda x: self.province_data_arr[x], index=self.selected_provine_key.index(MAIN_USER().load_data_for_user()[2])
+                                                                  , disabled=disable,
+                                                                  help="Khu vực sử dụng của bạn sẽ được sử dụng để cung cấp thông tin phù hợp với khu vực của bạn")
+                    status_send_load_db = int(MAIN_USER().load_data_for_user()[3])
+                    send_mail_status = cols_change_display[0].checkbox("Gửi báo cáo mới nhất qua email",
+                                                                       value=status_send_load_db if status_send_load_db is not None else 1
+                                                                       , key="send_mail_status", disabled=disable,
+                                                                       help="Nhận các báo cáo liên quan đến giá bất động sản qua email")
                     if st.form_submit_button("Save", icon=":material/save:", type="primary", help="Nhấn vào để lưu thay đổi!", disabled=disable):
                         with st.spinner("🔐 Đang thực hiện thao tác..."):
                             if display_name:
-                                if module_users.change_profile(st.session_state.username_house, display_name):
+                                if module_users.change_profile(st.session_state.username_house, display_name,region_use,send_mail_status):
                                     st.toast("##### Đổi thông tin thành công!", icon="✅")
                                     st.session_state.display_name_house = display_name
                                     time.sleep(1)
                                     module_users.load_data_for_user.clear()
                                     st.rerun()
                                 else:
-                                    st.toast("##### Mã nhân viên đã tồn tại!", icon="❌")
+                                    st.toast("##### Đổi thông tin thất bại!", icon="❌")
                                     time.sleep(1)
                             else:
                                 st.toast(f"##### Vui lòng nhập thông tin!", icon="⚠️")
@@ -210,11 +226,24 @@ class MAIN_USER():
     def load_data_for_user(self):
         diplay_name = data_user[data_user["username"] == st.session_state.username_house]["display_name"].values[0]
         role = data_user[data_user["username"] == st.session_state.username_house]["role"].values[0]
-        return diplay_name,role
-    
-if (st.session_state.login_request == False and st.session_state.register_request == False) or (st.session_state.login_request is None and st.session_state.register_request is None): 
-    data_user = module_users.load_data_for_user(st.session_state.username_house)
-        
-    main_user = MAIN_USER()
-    main_user.user()
-    module_config.add_sidebar_footer()
+        region_use = data_user[data_user["username"] == st.session_state.username_house]["region_use"].values[0]
+        send_mail = data_user[data_user["username"] == st.session_state.username_house]["send_mail"].values[0]
+        return diplay_name,role,region_use,send_mail
+if not st.session_state.get("is_logged_in", False) and (st.session_state.login_request == None) and (st.session_state.register_request == None):
+    empty_notification = st.empty()
+    button_empty = st.empty()
+    empty_notification.warning("##### Bạn cần đăng nhập để sử dụng chức năng này!",icon=":material/family_star:")
+    button_login_notif = button_empty.button("Đăng nhập", key="login_button_from_userpage")
+    if button_login_notif:
+        with st.spinner("🔐 Đang chuyển hướng đến trang đăng nhập..."):
+            time.sleep(2)
+        st.session_state.login_request = True
+        empty_notification.empty()
+        button_empty.empty()
+else:    
+    if (st.session_state.login_request == False and st.session_state.register_request == False) or (st.session_state.login_request is None and st.session_state.register_request is None): 
+        data_user = module_users.load_data_for_user(st.session_state.username_house)
+            
+        main_user = MAIN_USER()
+        main_user.user()
+        module_config.add_sidebar_footer()

@@ -21,3 +21,17 @@
 [data-testid="stHeader"] {
     background: rgba(0,0,0,0);
 }
+@media (max-width: 768px) {
+
+    [data-testid="stHeader"] {
+        background: white;
+    }
+    
+}
+
+@media (max-width: 480px) {
+    [data-testid="stHeader"] {
+        background: white;
+    }
+}
+/* #MainMenu {visibility: hidden;} */
