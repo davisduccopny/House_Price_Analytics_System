@@ -7,7 +7,13 @@ import PROJECTS.module_expand as module_expand
 import PROJECTS.module_users as module_users
 import numpy as np
 import plotly.graph_objects as go
+from PROJECTS.module_expand import load_page_data_references
 
+if "login_request" not in st.session_state:
+    st.session_state.login_request = None
+if "register_request" not in st.session_state:
+    st.session_state.register_request = None
+    
 with open('src/style/style.css', encoding="utf-8")as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html = True)
 with open('src/style/style_expand.css', encoding="utf-8")as f:
@@ -16,6 +22,22 @@ with open('src/style/style_expand.css', encoding="utf-8")as f:
 class EXPAND_CLASS():
     def __init__(self):
         pass
+    def ui_info(self, text,loai_data):
+        container_title_manage_expand = st.container(key="container_title_manage_expand")
+        with container_title_manage_expand:
+            col_title_dmanage_expand = st.columns([5,2])
+            col_title_dmanage_expand[0].markdown(f"""<h3 style='text-align: left; padding:0; margin-bottom:5px;'>{text}</h3>
+                                            <p style='text-align: left; padding:0'>Biết nhiều hơn về bất động sản! <span style="color:#c4c411; font-weight:bolder;"> {loai_data} </span></p>""", unsafe_allow_html=True)
+            with col_title_dmanage_expand[1]:
+                with st.form(key="search_form", enter_to_submit=True,border=False):
+                    cols_search = st.columns([6,1])
+                    search_term = cols_search[0].text_input(label=" ",placeholder="Tìm kiếm thông tin", key="search_term",type="default")
+                    if cols_search[1].form_submit_button("🔍",use_container_width=True):
+                        if search_term:
+                            return search_term
+                        else:
+                            st.toast(f"##### Vui lòng nhập thông tin!", icon="⚠️")
+                            return None
     def calculate_loan(self,principal, rate, years):
         monthly_rate = rate / 12 / 100
         months = years * 12
@@ -65,6 +87,161 @@ class EXPAND_CLASS():
                 fig.update_layout(title="Biểu đồ thanh toán khoản vay theo tháng", xaxis_title="Tháng", yaxis_title="Số tiền (VND)", legend_title="Loại khoản thanh toán")
 
                 st.plotly_chart(fig, use_container_width=True,key="plotly_chart_loan")
+   
+
+    def reference_ui(self):
+        if "references" not in st.session_state or len(st.session_state.references) == 0:
+            st.session_state.references = load_page_data_references(0, 9)
+            st.session_state.reference_offset = 9
+
+        st.markdown("""
+            <style>
+                .grid-container {
+                    display: grid;
+                    grid-template-columns: repeat(3, 1fr);
+                    gap: 20px;
+                    background-color: #f9f9f9;
+                    padding: 20px;
+                    border-radius: 10px;
+                }
+                .grid-item {
+                    display: flex;
+                    align-items: center;
+                    background: white;
+                    padding: 10px;
+                    margin-bottom: 10px;
+                    border-radius: 10px;
+                    box-shadow: 0px 2px 5px rgba(0,0,0,0.1);
+                }
+                .grid-item img {
+                    width: 80px;
+                    height: 80px;
+                    margin-right: 10px;
+                    border-radius: 5px;
+                }
+                .grid-item a {
+                    text-decoration: none;
+                    color: #007BFF;
+                    font-size: 16px;
+                    font-weight: bold;
+                }
+            </style>
+            <div class="grid-container">
+        """, unsafe_allow_html=True)
+
+        for item in st.session_state.references:
+            st.markdown(f"""    
+                <div class="grid-item">
+                    <img src='{item["link_image"]}' alt='Thumbnail'>
+                    <a href='{item["link_page"]}' target='_blank'>{item["title"]}</a>
+                </div>
+            """, unsafe_allow_html=True)
+
+        st.markdown("</div>", unsafe_allow_html=True)
+        
+        if len(load_page_data_references(st.session_state.reference_offset, 1)) > 0:
+            if st.button("Xem thêm"):
+                new_references = load_page_data_references(st.session_state.reference_offset, limit=9)
+                st.session_state.references.extend(new_references)  # Giữ bài cũ + thêm bài mới
+                st.session_state.reference_offset += 9 
+
+    def guide_ui(self):
+        ctn_guide_ui = st.container()
+        with ctn_guide_ui:
+            st.markdown("""
+                    <style>
+                    .guide-container {
+                        background-color: #f9f9f9;
+                        padding: 25px;
+                        border-radius: 12px;
+                        box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+                    }
+                    .guide-title {
+                        text-align: center;
+                        font-size: 24px;
+                        font-weight: bold;
+                        color: #2c3e50;
+                        margin-bottom: 15px;
+                    }
+                    .guide-section {
+                        margin-top: 15px;
+                        padding: 15px;
+                        border-left: 5px solid #3498db;
+                        background-color: #ecf0f1;
+                        border-radius: 8px;
+                    }
+                    .guide-section h4 {
+                        color: #2980b9;
+                        margin-bottom: 8px;
+                    }
+                    .guide-section p {
+                        color: #2c3e50;
+                        font-size: 16px;
+                    }
+                    .guide-list {
+                        padding-left: 20px;
+                    }
+                    </style>
+            
+                    <div class='guide-container'>
+                    <h3 class='guide-title'>HƯỚNG DẪN SỬ DỤNG</h3>
+
+                    <div class='guide-section'>
+                        <h4>1. Dự đoán giá bất động sản</h4>
+                        <p>Chọn khu vực bạn quan tâm và nhập các thông tin cần thiết để dự đoán giá bất động sản.</p>
+                    </div>
+                    
+                    <div class='guide-section'>
+                        <h4>2. Phân tích dữ liệu bất động sản</h4>
+                        <p>Sử dụng công cụ phân tích để xem xu hướng và thông tin chi tiết về thị trường.</p>
+                    </div>
+                    
+                    <div class='guide-section'>
+                        <h4>3. So sánh dữ liệu giữa các khu vực</h4>
+                        <p>Chọn các khu vực để so sánh sự khác biệt về giá cả, xu hướng và các yếu tố khác.</p>
+                    </div>
+                    
+                    <div class='guide-section'>
+                        <h4>4. Gửi email báo cáo bất động sản</h4>
+                        <p>Nhập email của bạn để nhận báo cáo chi tiết về thị trường.</p>
+                    </div>
+                    
+                    <div class='guide-section'>
+                        <h4>5. Công cụ tính khoản vay</h4>
+                        <p>Nhập số tiền vay, thời gian vay, lãi suất để tính toán khoản vay.</p>
+                        <p><b>Ví dụ:</b> Nếu vay 2 tỷ VND trong 15 năm với lãi suất 7.5%/năm, số tiền trả hàng tháng sẽ là <b>18,537,000 VND</b>.</p>
+                    </div>
+                    
+                    <div class='guide-section'>
+                        <h4>6. Tham khảo & Hướng dẫn</h4>
+                        <p>Cung cấp các bài viết về mua bán, đầu tư bất động sản, cùng hướng dẫn chi tiết về ứng dụng.</p>
+                    </div>
+                    
+                    <div class='guide-section'>
+                        <h4>7. Liên hệ</h4>
+                        <p>Mọi thắc mắc xin gửi email đến <b>support@example.com</b>.</p>
+                    </div>
+                    
+                    <div class='guide-section'>
+                        <h4>8. Các bước sử dụng</h4>
+                        <ol class='guide-list'>
+                            <li>Chọn công cụ tính khoản vay.</li>
+                            <li>Nhập thông tin số tiền vay, thời gian vay, lãi suất.</li>
+                            <li>Nhấn "Tính toán" để xem kết quả.</li>
+                            <li>Đọc các bài viết tham khảo.</li>
+                            <li>Xem hướng dẫn chi tiết tại mục "Hướng dẫn".</li>
+                        </ol>
+                    </div>
+                    
+                    <div class='guide-section'>
+                        <h4>9. Lưu ý</h4>
+                        <p>Thông tin chỉ mang tính chất tham khảo. Hãy liên hệ chuyên gia tài chính để được tư vấn cụ thể.</p>
+                    </div>
+                    </div>
+            
+            """, unsafe_allow_html=True)
+
+        
 class MAIN_RUN():
     def __init__(self):
         self.expand_class = EXPAND_CLASS()
@@ -114,8 +291,9 @@ class MAIN_RUN():
         if option == "Công cụ tính khoản vay":
             self.expand_class.loan_ui()
         elif option == "Tham khảo":
-            st.title("Tham khảo")
+            self.expand_class.ui_info("THAM KHẢO","Team Real Estate")
+            self.expand_class.reference_ui()
         elif option == "Hướng dẫn":
-            st.title("Hướng dẫn")
+            self.expand_class.guide_ui()
 main_run_app = MAIN_RUN()
 main_run_app.run_expand()

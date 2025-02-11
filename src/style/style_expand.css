@@ -1,10 +1,20 @@
 [data-testid=stMainBlockContainer ] {
     padding: 1rem 5rem 10rem;
 }
+.st-key-search_term > [data-testid="stTextInput"]{
+    display: flex;
+}
+
+.st-key-container_title_manage_expand{
+    border-bottom: rgb(61, 157, 243) 3px solid;
+}
 @media (max-width: 768px) {
 
     [data-testid=stMainBlockContainer ] {
         padding: 3rem 3rem 8rem;
+    }
+    .st-key-container_title_manage_expand{
+        margin-top: 2%;
     }
     
 }
@@ -12,5 +22,8 @@
 @media (max-width: 480px) {
     [data-testid=stMainBlockContainer ] {
         padding: 3rem 1rem 5rem;
+    }
+    .st-key-container_title_manage_expand{
+        margin-top: 5%;
     }
 }
