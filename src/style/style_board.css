@@ -1,0 +1,60 @@
+[data-testid=stMainBlockContainer ] {
+    padding: 0rem 4.5rem 10rem;
+}
+.st-key-ctn_house_header .stColumn,.st-key-ctn_secondary_board_house .stColumn,.st-key-ctn_main_board_house .stColumn,.st-key-ctn_table_show_mean,.st-key-ctn_map_chart_mean_main,.st-key-ctn_metric_board_01, .st-key-ctn_metric_board_02,.st-key-ctn_metric_board_03,.st-key-ctn_metric_board_04{
+    padding: 5px 10px;
+    border-radius:15px;
+    font-weight: bolder;
+    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.1);       
+}
+.st-key-ctn_house_header .stColumn{
+    border-left: 5px solid #00a6a6;
+}
+.st-key-ctn_metric_board_01, .st-key-ctn_metric_board_02,.st-key-ctn_metric_board_03,.st-key-ctn_metric_board_04{
+    border-left: 5px solid #00a6a6;
+}
+.st-key-radio_selected_params [data-testid="stRadio"] [data-testid="stWidgetLabel"] [data-testid="stMarkdownContainer"] p{
+    font-weight: bolder;
+    font-size: 1rem;
+}
+.st-key-radio_selected_params [data-testid="stRadio"] [data-baseweb="radio"]{
+    border-radius: 8px; /* Bo góc */
+    padding: 3px;
+    cursor: pointer; 
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease-in-out;
+    width: max-content;
+    width: 150px;
+}
+.st-key-radio_selected_params [data-testid="stRadio"] label:hover {
+    background-color: #78c5f2; 
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.2); 
+    
+}
+.st-key-radio_selected_params [data-testid="stRadio"] p:hover,.st-key-radio_selected_params [data-testid="stRadio"] label[data-selected="true"]{
+    font-weight: bolder;
+}
+
+@media (max-width: 1200px) {
+    [data-testid=stMainBlockContainer ] {
+        padding: 0rem 3rem 8rem;
+    }
+}
+
+@media (max-width: 992px) {
+    [data-testid=stMainBlockContainer ] {
+        padding: 3rem 0.5rem 6rem;
+    }
+}
+
+@media (max-width: 768px) {
+    [data-testid=stMainBlockContainer ] {
+        padding: 3rem 0.5rem 4rem;
+    }
+}
+
+@media (max-width: 576px) {
+    [data-testid=stMainBlockContainer ] {
+        padding: 6rem 1rem 10rem;
+    }
+}

@@ -1,0 +1,37 @@
+[data-testid="stBaseButton-primary"] p{
+    font-size: 0.8rem;
+    font-weight: bolder;
+}
+[data-testid="stBaseButton-secondary"] p{
+    font-size: 0.8rem;
+    font-weight: bolder;
+}
+[data-testid="stPopoverButton"] p{
+    font-size: 0.8rem;
+    font-weight: bolder;
+}
+[data-testid="stSidebarNavLink"]{
+    gap: 1.5rem;
+}
+[data-testid="stSidebarNavLink"] span [data-testid="stIconMaterial"]{
+    font-size: 1.25rem;
+    width: 1.25rem;
+    height: 1.25rem;
+}
+[data-testid="stHeader"] {
+    background: rgba(0,0,0,0);
+}
+@media (max-width: 768px) {
+
+    [data-testid="stHeader"] {
+        background: white;
+    }
+    
+}
+
+@media (max-width: 480px) {
+    [data-testid="stHeader"] {
+        background: white;
+    }
+}
+/* #MainMenu {visibility: hidden;} */
