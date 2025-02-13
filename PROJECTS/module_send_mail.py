@@ -180,4 +180,4 @@ def daily_send_mail_real_estate():
                 if send_report_email(receiver_email,html_save):
                     count_send += 1
     print(f"✅ Đã gửi báo cáo cho {count_send} người dùng")
-daily_send_mail_real_estate()
+# daily_send_mail_real_estate()

@@ -162,7 +162,7 @@ class FRONTEND_UI_DESIGN():
                                             format_func=lambda x: self.province_data_arr[x], index=self.selected_provine_key.index(MAIN_USER().load_data_for_user()[2])
                                                                   , disabled=disable,
                                                                   help="Khu vực sử dụng của bạn sẽ được sử dụng để cung cấp thông tin phù hợp với khu vực của bạn")
-                    status_send_load_db = int(MAIN_USER().load_data_for_user()[3])
+                    status_send_load_db = int(MAIN_USER().load_data_for_user()[3]) if MAIN_USER().load_data_for_user()[3] != None else MAIN_USER().load_data_for_user()[3]
                     send_mail_status = cols_change_display[0].checkbox("Gửi báo cáo mới nhất qua email",
                                                                        value=status_send_load_db if status_send_load_db is not None else 1
                                                                        , key="send_mail_status", disabled=disable,
