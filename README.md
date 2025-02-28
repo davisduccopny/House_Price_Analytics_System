@@ -1,6 +1,6 @@
 # House Price Prediction
 
-This project focuses on predicting house prices using Long Short-Term Memory (LSTM) and Recurrent Neural Networks (RNN).
+This project focuses on predicting house prices using **Linear Regression** and **RandomForestRegressor**.
 
 ## Table of Contents
 - [Introduction](#introduction)
@@ -13,27 +13,30 @@ This project focuses on predicting house prices using Long Short-Term Memory (LS
 - [References](#references)
 
 ## Introduction
-House price prediction is a crucial task in the real estate industry. This project aims to leverage the power of LSTM and RNN models to predict house prices based on historical data.
+House price prediction is a crucial task in the real estate industry. This project aims to leverage the power of **Linear Regression** and **RandomForestRegressor** to predict house prices based on various features.
 
 ## Dataset
-The dataset used in this project includes various features such as location, size, number of rooms, and historical prices. The data is preprocessed to handle missing values and normalize the features.
+The dataset used in this project includes various features such as location, size, number of rooms, and historical prices. The data is preprocessed to handle missing values and normalize the features for better model performance.
 
 ## Model Architecture
-The model architecture consists of LSTM and RNN layers to capture temporal dependencies in the data. The architecture is designed to handle sequential data effectively.
+The project implements two models:
+1. **Linear Regression** – A simple yet effective approach for predicting house prices based on feature relationships.
+2. **RandomForestRegressor** – A robust ensemble learning method that improves prediction accuracy by combining multiple decision trees.
 
 ## Training
-The model is trained using the preprocessed dataset. Various hyperparameters such as learning rate, batch size, and number of epochs are tuned to optimize the model's performance.
+The models are trained using the preprocessed dataset. Various hyperparameters such as the number of estimators (for RandomForestRegressor) and regularization techniques (for Linear Regression) are tuned to optimize performance.
 
 ## Evaluation
-The model's performance is evaluated using metrics such as Mean Absolute Error (MAE) and Root Mean Squared Error (RMSE). Cross-validation is used to ensure the model's robustness.
+The models' performance is evaluated using metrics such as **Mean Absolute Error (MAE)** and **Root Mean Squared Error (RMSE)**. Cross-validation is applied to ensure model generalization.
 
 ## Results
-The results section presents the model's performance on the test dataset. Visualizations such as loss curves and predicted vs actual price plots are included to illustrate the model's effectiveness.
+The results section presents the model's performance on the test dataset. Visualizations such as residual plots and predicted vs actual price plots are included to illustrate the models' effectiveness.
 
 ## Conclusion
-The project demonstrates the potential of LSTM and RNN models in predicting house prices. Future work may include exploring other model architectures and incorporating additional features.
+The project demonstrates the potential of **Linear Regression** and **RandomForestRegressor** in predicting house prices. Future work may include exploring additional machine learning models and incorporating more complex features for improved accuracy.
 
 ## References
-- [LSTM Networks](https://en.wikipedia.org/wiki/Long_short-term_memory)
-- [RNN](https://en.wikipedia.org/wiki/Recurrent_neural_network)
+- [Linear Regression](https://en.wikipedia.org/wiki/Linear_regression)
+- [Random Forest](https://en.wikipedia.org/wiki/Random_forest)
 - [House Price Prediction](https://www.kaggle.com/c/house-prices-advanced-regression-techniques)
+
