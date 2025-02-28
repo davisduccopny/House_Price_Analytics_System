@@ -162,3 +162,6 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+# Other
+reports\BaoCaoDoAn_2156210125_2156210140_2156210133_QLTTB_2021_2025.pdf
+reports\doan.docx
