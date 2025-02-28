@@ -24,7 +24,7 @@ def connect_mysql():
         print(f"❌ Error: {err}")
         return None
 
-sender_email = "hoangquocbusinesstech@gmail.com"
+sender_email = os.environ.get("send_mail_address")
 sender_password = os.environ.get("send_mail_prediction")
 
 def generate_otp():

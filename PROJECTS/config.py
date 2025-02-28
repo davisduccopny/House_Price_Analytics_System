@@ -10,6 +10,7 @@ import time
 import datetime
 from mysql.connector.errors import PoolError
 from st_social_media_links import SocialMediaIcons
+import os
 
 # PATH FOR DATABASE
 
@@ -17,12 +18,12 @@ def create_db_pool():
     if "db_pool" not in st.session_state or st.session_state.db_pool:
         st.session_state.db_pool = mysql.connector.pooling.MySQLConnectionPool(
             pool_name="my_pool_vnpt",
-            pool_size=10,
+            pool_size=5,
             pool_reset_session=True,
-            host='103.200.23.68',
-            user='samryvnc_user_data_science',
-            password='Datascience@2003',
-            database='samryvnc_house_price_prediction'
+            host= os.environ.get("DB_HOST"),
+            user= os.environ.get("DB_USER"),
+            password= os.environ.get("DB_PASSWORD"),
+            database= os.environ.get("DB_NAME")
         )
 
 # Hàm lấy kết nối từ pool
