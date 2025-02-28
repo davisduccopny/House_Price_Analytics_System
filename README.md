@@ -6,6 +6,8 @@ This project focuses on predicting house prices using **Linear Regression** and 
 - [Introduction](#introduction)
 - [Dataset](#dataset)
 - [Model Architecture](#model-architecture)
+- [Installation](#installation)
+- [Usage](#usage)
 - [Training](#training)
 - [Evaluation](#evaluation)
 - [Results](#results)
@@ -23,8 +25,35 @@ The project implements two models:
 1. **Linear Regression** – A simple yet effective approach for predicting house prices based on feature relationships.
 2. **RandomForestRegressor** – A robust ensemble learning method that improves prediction accuracy by combining multiple decision trees.
 
+## Installation
+To set up the project, follow these steps:
+
+1. Clone the repository:
+   ```bash
+   git clone [https://github.com/your-repo/house-price-prediction.git](https://github.com/davisduccopny/House_Price_Analytics_System.git)
+   cd house-price-prediction
+   ```
+2. Create a virtual environment and activate it:
+   ```bash
+   python -m venv .venv
+   source venv/bin/activate  # On Windows use `.venv\Scripts\activate`
+   ```
+3. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+## Usage
+To run the prediction script, execute the following command:
+
+```bash
+python main.py 
+```
+
+
 ## Training
 The models are trained using the preprocessed dataset. Various hyperparameters such as the number of estimators (for RandomForestRegressor) and regularization techniques (for Linear Regression) are tuned to optimize performance.
+
 
 ## Evaluation
 The models' performance is evaluated using metrics such as **Mean Absolute Error (MAE)** and **Root Mean Squared Error (RMSE)**. Cross-validation is applied to ensure model generalization.
